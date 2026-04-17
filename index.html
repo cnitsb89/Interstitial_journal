@@ -1,0 +1,1313 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover, user-scalable=no" />
+<title>Nitin's Interstitial</title>
+
+<!-- iOS web app -->
+<meta name="apple-mobile-web-app-capable" content="yes" />
+<meta name="mobile-web-app-capable" content="yes" />
+<meta name="apple-mobile-web-app-status-bar-style" content="default" />
+<meta name="apple-mobile-web-app-title" content="Nitin's Interstitial" />
+<meta name="theme-color" content="#fbf8f1" />
+<meta name="description" content="A journal for the notes taken in the spaces between." />
+
+<!-- Inline SVG favicon + Apple touch icon (no external files needed) -->
+<link rel="icon" type="image/svg+xml" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'%3E%3Crect width='100' height='100' fill='%23e4ebd9'/%3E%3Ctext x='50' y='74' text-anchor='middle' font-family='Georgia,serif' font-style='italic' font-size='72' fill='%236b7a4a'%3EI%3C/text%3E%3C/svg%3E" />
+<link rel="apple-touch-icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 180 180'%3E%3Crect width='180' height='180' rx='40' fill='%23e4ebd9'/%3E%3Ctext x='90' y='132' text-anchor='middle' font-family='Georgia,serif' font-style='italic' font-size='128' fill='%236b7a4a'%3EI%3C/text%3E%3C/svg%3E" />
+
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Fraunces:ital,opsz,wght@0,9..144,300;0,9..144,400;0,9..144,500;0,9..144,700;1,9..144,400&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --ink: #2a2722;
+    --ink-soft: #6b655c;
+    --paper: #fbf8f1;
+    --paper-deep: #f5f0e4;
+    --rule: #e0d8c6;
+    --accent: #a64628;
+    --accent-deep: #7d3320;
+    --moss: #6b7a4a;
+    --gold: #c9a85a;
+    --pastel-blush: #f5dcd2;
+    --pastel-sky: #dde8ec;
+    --pastel-sage: #e4ebd9;
+    --pastel-cream: #f7ebd4;
+  }
+
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+
+  html, body {
+    background: var(--paper);
+    color: var(--ink);
+    font-family: 'Fraunces', Georgia, serif;
+    min-height: 100dvh;
+    overflow-x: hidden;
+    -webkit-tap-highlight-color: transparent;
+    -webkit-touch-callout: none;
+  }
+
+  html {
+    /* Prevent white flash on elastic overscroll */
+    background: var(--paper);
+  }
+
+  /* Let textareas and inputs keep normal text selection + callout */
+  textarea, input {
+    -webkit-touch-callout: default;
+    -webkit-user-select: text;
+    user-select: text;
+  }
+
+  body::before {
+    content: '';
+    position: fixed;
+    inset: 0;
+    background-image:
+      radial-gradient(circle at 20% 30%, rgba(166, 70, 40, 0.03) 0%, transparent 45%),
+      radial-gradient(circle at 80% 70%, rgba(107, 122, 74, 0.035) 0%, transparent 45%);
+    pointer-events: none;
+    z-index: 0;
+  }
+
+  .wrap {
+    position: relative;
+    z-index: 2;
+    max-width: 920px;
+    margin: 0 auto;
+    padding:
+      calc(48px + env(safe-area-inset-top))
+      calc(32px + env(safe-area-inset-right))
+      calc(120px + env(safe-area-inset-bottom))
+      calc(32px + env(safe-area-inset-left));
+  }
+
+  header.masthead {
+    background: linear-gradient(135deg, var(--pastel-blush) 0%, var(--pastel-cream) 100%);
+    border: 1px solid var(--rule);
+    padding: 28px 32px 24px;
+    margin-bottom: 0;
+    display: grid;
+    grid-template-columns: 1fr auto 1fr;
+    align-items: end;
+    gap: 16px;
+  }
+
+  .masthead .edition {
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 10px;
+    letter-spacing: 0.2em;
+    text-transform: uppercase;
+    color: var(--ink-soft);
+  }
+
+  .masthead h1 {
+    font-family: 'Fraunces', Georgia, serif;
+    font-weight: 400;
+    font-variation-settings: 'opsz' 144;
+    font-size: clamp(36px, 11vw, 84px);
+    line-height: 0.9;
+    letter-spacing: -0.03em;
+    text-align: center;
+    font-style: italic;
+    word-break: keep-all;
+    hyphens: none;
+  }
+
+  .masthead h1 .possessive {
+    display: block;
+    font-size: 0.5em;
+    font-style: italic;
+    font-weight: 400;
+    letter-spacing: -0.03em;
+    color: var(--ink);
+    line-height: 0.8;
+    margin-bottom: -0.25em;
+  }
+
+  .masthead h1 .amp {
+    color: var(--accent);
+    font-weight: 300;
+  }
+
+  .masthead .date-stamp {
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 10px;
+    letter-spacing: 0.2em;
+    text-transform: uppercase;
+    color: var(--ink-soft);
+    text-align: right;
+  }
+
+  .tagline-bar {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 24px;
+    padding: 14px 20px;
+    background: var(--pastel-sage);
+    border: 1px solid var(--rule);
+    border-top: none;
+    flex-wrap: wrap;
+  }
+
+  .tagline {
+    text-align: center;
+    font-size: 14px;
+    color: var(--ink-soft);
+    font-style: italic;
+    margin: 0;
+    letter-spacing: 0.02em;
+  }
+
+  /* Hourly reminder toggle */
+  .toggle {
+    display: inline-flex;
+    align-items: center;
+    gap: 10px;
+    cursor: pointer;
+    user-select: none;
+  }
+
+  .toggle input {
+    position: absolute;
+    opacity: 0;
+    pointer-events: none;
+  }
+
+  .toggle-track {
+    position: relative;
+    width: 36px;
+    height: 20px;
+    background: var(--paper);
+    border: 1px solid var(--rule);
+    border-radius: 20px;
+    transition: background 0.25s, border-color 0.25s;
+  }
+
+  .toggle-thumb {
+    position: absolute;
+    top: 2px;
+    left: 2px;
+    width: 14px;
+    height: 14px;
+    background: var(--ink-soft);
+    border-radius: 50%;
+    transition: transform 0.25s, background 0.25s;
+  }
+
+  .toggle input:checked ~ .toggle-track {
+    background: var(--pastel-blush);
+    border-color: var(--accent);
+  }
+
+  .toggle input:checked ~ .toggle-track .toggle-thumb {
+    transform: translateX(16px);
+    background: var(--accent);
+  }
+
+  .toggle-label {
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 10px;
+    letter-spacing: 0.15em;
+    text-transform: uppercase;
+    color: var(--ink-soft);
+  }
+
+  .toggle input:checked ~ .toggle-label {
+    color: var(--accent);
+  }
+
+  @media (max-width: 520px) {
+    .tagline-bar { flex-direction: column; gap: 12px; }
+  }
+
+  .tagline::before, .tagline::after {
+    content: '·';
+    margin: 0 12px;
+    color: var(--accent);
+  }
+
+  /* Tabs */
+  .tabs {
+    display: flex;
+    gap: 0;
+    margin-top: 24px;
+    margin-bottom: 32px;
+    border: 1px solid var(--rule);
+    background: var(--pastel-sky);
+    padding: 0 8px;
+  }
+
+  .tab {
+    background: none;
+    border: none;
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 11px;
+    letter-spacing: 0.12em;
+    text-transform: uppercase;
+    padding: 16px 14px;
+    min-height: 48px;
+    cursor: pointer;
+    color: var(--ink-soft);
+    position: relative;
+    transition: color 0.2s;
+    -webkit-tap-highlight-color: transparent;
+    touch-action: manipulation;
+    flex: 1;
+  }
+
+  .tab:hover { color: var(--ink); }
+
+  .tab.active {
+    color: var(--ink);
+    font-weight: 500;
+  }
+
+  .tab.active::after {
+    content: '';
+    position: absolute;
+    bottom: -2px;
+    left: 0;
+    right: 0;
+    height: 4px;
+    background: var(--accent);
+  }
+
+  .panel { display: none; }
+  .panel.active { display: block; animation: rise 0.4s ease; }
+
+  @keyframes rise {
+    from { opacity: 0; transform: translateY(8px); }
+    to { opacity: 1; transform: translateY(0); }
+  }
+
+  /* Compose */
+  .compose {
+    background: var(--paper-deep);
+    border: 1px solid var(--rule);
+    padding: 28px;
+    position: relative;
+  }
+
+  .compose::before {
+    content: '';
+    position: absolute;
+    top: 6px; left: 6px; right: 6px; bottom: 6px;
+    border: 1px solid var(--rule);
+    pointer-events: none;
+  }
+
+  .compose-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: baseline;
+    margin-bottom: 16px;
+    padding-bottom: 12px;
+    border-bottom: 1px dashed var(--rule);
+  }
+
+  .compose-label {
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 10px;
+    letter-spacing: 0.2em;
+    text-transform: uppercase;
+    color: var(--accent);
+  }
+
+  .live-time {
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 11px;
+    color: var(--ink-soft);
+    letter-spacing: 0.05em;
+  }
+
+  textarea {
+    width: 100%;
+    min-height: 140px;
+    background: transparent;
+    border: none;
+    outline: none;
+    resize: vertical;
+    font-family: 'Helvetica Neue', Helvetica, Arial, sans-serif;
+    font-size: 18px;
+    line-height: 1.6;
+    color: var(--ink);
+  }
+
+  textarea::placeholder {
+    color: var(--ink-soft);
+    font-style: italic;
+    opacity: 0.6;
+  }
+
+  .compose-footer {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-top: 16px;
+    padding-top: 12px;
+    border-top: 1px dashed var(--rule);
+  }
+
+  .hint {
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 10px;
+    color: var(--ink-soft);
+    letter-spacing: 0.05em;
+  }
+
+  .hint kbd {
+    background: var(--ink);
+    color: var(--paper);
+    padding: 2px 6px;
+    border-radius: 2px;
+    font-size: 9px;
+    margin: 0 2px;
+  }
+
+  button.primary {
+    background: var(--accent);
+    color: var(--paper);
+    border: none;
+    padding: 14px 28px;
+    min-height: 44px;
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 12px;
+    letter-spacing: 0.2em;
+    text-transform: uppercase;
+    cursor: pointer;
+    transition: all 0.2s;
+    font-weight: 500;
+    -webkit-tap-highlight-color: transparent;
+    touch-action: manipulation;
+  }
+
+  button.primary:active {
+    background: var(--accent-deep);
+    transform: scale(0.97);
+  }
+
+  /* Recent entries under compose */
+  .recent {
+    margin-top: 48px;
+  }
+
+  .section-title {
+    font-family: 'Fraunces', Georgia, serif;
+    font-style: italic;
+    font-size: 24px;
+    font-weight: 400;
+    margin-bottom: 4px;
+  }
+
+  .section-rule {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    margin-bottom: 24px;
+  }
+
+  .section-rule::after {
+    content: '';
+    flex: 1;
+    height: 1px;
+    background: var(--ink);
+  }
+
+  .section-rule .count {
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 10px;
+    color: var(--ink-soft);
+    letter-spacing: 0.15em;
+  }
+
+  .entries { list-style: none; }
+
+  .entry {
+    display: grid;
+    grid-template-columns: 120px 1fr;
+    gap: 24px;
+    padding: 20px 80px 20px 0;
+    border-bottom: 1px solid var(--rule);
+    position: relative;
+  }
+
+  .entry-time {
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 11px;
+    color: var(--ink-soft);
+    letter-spacing: 0.05em;
+    padding-top: 4px;
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+  }
+
+  .entry-time .hhmm {
+    font-size: 18px;
+    color: var(--ink);
+    letter-spacing: 0.02em;
+    font-weight: 500;
+  }
+
+  .entry-time .date {
+    font-size: 10px;
+    text-transform: uppercase;
+    letter-spacing: 0.15em;
+  }
+
+  .entry-body {
+    font-family: 'Helvetica Neue', Helvetica, Arial, sans-serif;
+    font-size: 17px;
+    line-height: 1.55;
+    color: var(--ink);
+    white-space: pre-wrap;
+    word-wrap: break-word;
+  }
+
+  .delete {
+    position: absolute;
+    top: 14px;
+    right: 0;
+    background: transparent;
+    border: 1px solid var(--rule);
+    color: var(--ink-soft);
+    cursor: pointer;
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 10px;
+    letter-spacing: 0.15em;
+    text-transform: uppercase;
+    padding: 10px 14px;
+    min-height: 36px;
+    opacity: 0.65;
+    transition: all 0.2s;
+    -webkit-tap-highlight-color: rgba(166, 70, 40, 0.2);
+    touch-action: manipulation;
+  }
+
+  .delete:active {
+    opacity: 1;
+    color: var(--accent);
+    border-color: var(--accent);
+    background: var(--paper-deep);
+  }
+
+  .delete.armed {
+    opacity: 1;
+    color: var(--paper);
+    background: var(--accent);
+    border-color: var(--accent);
+  }
+
+  /* Desktop: fade until hover for cleaner look */
+  @media (hover: hover) and (pointer: fine) {
+    .delete { opacity: 0; }
+    .entry:hover .delete { opacity: 0.7; }
+    .entry .delete:hover { opacity: 1; color: var(--accent); border-color: var(--accent); }
+  }
+
+  /* Search */
+  .search-box {
+    position: relative;
+    margin-bottom: 24px;
+  }
+
+  .search-input {
+    width: 100%;
+    background: var(--paper-deep);
+    border: 1px solid var(--rule);
+    padding: 16px 20px 16px 48px;
+    font-family: 'Fraunces', Georgia, serif;
+    font-size: 18px;
+    color: var(--ink);
+    outline: none;
+    transition: border-color 0.2s;
+  }
+
+  .search-input:focus { border-color: var(--accent); }
+
+  .search-icon {
+    position: absolute;
+    left: 18px;
+    top: 50%;
+    transform: translateY(-50%);
+    color: var(--ink-soft);
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 14px;
+  }
+
+  mark {
+    background: var(--gold);
+    color: var(--ink);
+    padding: 0 2px;
+    opacity: 0.7;
+  }
+
+  /* Summary */
+  .summary-nav {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 24px;
+    padding: 16px;
+    background: var(--paper-deep);
+    border: 1px solid var(--rule);
+  }
+
+  .summary-nav button {
+    background: none;
+    border: 1px solid var(--ink);
+    padding: 10px 16px;
+    min-height: 44px;
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 10px;
+    letter-spacing: 0.15em;
+    text-transform: uppercase;
+    cursor: pointer;
+    color: var(--ink);
+    transition: all 0.2s;
+    -webkit-tap-highlight-color: transparent;
+    touch-action: manipulation;
+  }
+
+  .summary-nav button:active {
+    background: var(--ink);
+    color: var(--paper);
+  }
+
+  .summary-nav button:disabled {
+    opacity: 0.3;
+    cursor: not-allowed;
+  }
+
+  .summary-date {
+    font-family: 'Fraunces', Georgia, serif;
+    font-style: italic;
+    font-size: 22px;
+  }
+
+  .summary-stats {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 16px;
+    margin-bottom: 32px;
+  }
+
+  .stat {
+    background: var(--paper-deep);
+    border: 1px solid var(--rule);
+    padding: 20px;
+    text-align: center;
+    position: relative;
+  }
+
+  .stat .num {
+    font-family: 'Fraunces', Georgia, serif;
+    font-size: 42px;
+    font-weight: 300;
+    color: var(--accent);
+    line-height: 1;
+    font-style: italic;
+  }
+
+  .stat .label {
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 9px;
+    letter-spacing: 0.2em;
+    text-transform: uppercase;
+    color: var(--ink-soft);
+    margin-top: 8px;
+  }
+
+  /* Empty state */
+  .empty {
+    text-align: center;
+    padding: 60px 20px;
+    color: var(--ink-soft);
+  }
+
+  .empty .ornament {
+    font-family: 'Fraunces', Georgia, serif;
+    font-size: 48px;
+    color: var(--accent);
+    margin-bottom: 16px;
+    font-style: italic;
+  }
+
+  .empty p {
+    font-style: italic;
+    font-size: 16px;
+  }
+
+  /* Export */
+  .export-bar {
+    display: flex;
+    justify-content: flex-end;
+    margin-bottom: 16px;
+  }
+
+  .btn-ghost {
+    background: none;
+    border: 1px solid var(--ink);
+    padding: 12px 18px;
+    min-height: 44px;
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 10px;
+    letter-spacing: 0.2em;
+    text-transform: uppercase;
+    cursor: pointer;
+    color: var(--ink);
+    transition: all 0.2s;
+    -webkit-tap-highlight-color: transparent;
+    touch-action: manipulation;
+  }
+
+  .btn-ghost:active {
+    background: var(--ink);
+    color: var(--paper);
+  }
+
+  /* Toast */
+  .toast {
+    position: fixed;
+    bottom: 32px;
+    left: 50%;
+    transform: translateX(-50%) translateY(100px);
+    background: var(--ink);
+    color: var(--paper);
+    padding: 12px 24px;
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 11px;
+    letter-spacing: 0.15em;
+    text-transform: uppercase;
+    transition: transform 0.3s ease;
+    z-index: 100;
+  }
+
+  .toast.show {
+    transform: translateX(-50%) translateY(0);
+  }
+
+  @media (max-width: 600px) {
+    .wrap {
+      padding:
+        calc(20px + env(safe-area-inset-top))
+        calc(14px + env(safe-area-inset-right))
+        calc(40px + env(safe-area-inset-bottom))
+        calc(14px + env(safe-area-inset-left));
+    }
+    header.masthead {
+      grid-template-columns: 1fr;
+      text-align: center;
+      padding: 22px 20px 18px;
+    }
+    .masthead .edition,
+    .masthead .date-stamp { text-align: center; }
+    .tagline-bar { padding: 12px 16px; }
+    .compose { padding: 20px; }
+    .compose::before { top: 5px; left: 5px; right: 5px; bottom: 5px; }
+    .compose-footer {
+      flex-direction: column;
+      gap: 12px;
+      align-items: stretch;
+    }
+    .compose-footer button.primary { width: 100%; }
+    .compose-footer .hint { text-align: center; order: 2; }
+    .entry {
+      grid-template-columns: 1fr;
+      gap: 6px;
+      padding: 18px 0 18px 0;
+    }
+    .entry-time {
+      flex-direction: row;
+      gap: 12px;
+      align-items: baseline;
+    }
+    .entry-time .hhmm { font-size: 15px; }
+    .delete {
+      position: static;
+      margin-top: 10px;
+      align-self: flex-start;
+      width: auto;
+      display: inline-block;
+    }
+    .summary-stats { grid-template-columns: repeat(3, 1fr); gap: 8px; }
+    .stat { padding: 14px 8px; }
+    .stat .num { font-size: 28px; }
+    .stat .label { font-size: 8px; letter-spacing: 0.15em; }
+    .summary-nav {
+      padding: 12px;
+      gap: 8px;
+    }
+    .summary-date { font-size: 16px; }
+    .summary-nav button { padding: 10px 12px; font-size: 9px; }
+    .tab {
+      padding: 14px 8px;
+      font-size: 10px;
+      letter-spacing: 0.08em;
+    }
+    .export-bar {
+      justify-content: stretch;
+      gap: 8px;
+    }
+    .export-bar .btn-ghost {
+      flex: 1;
+      margin-left: 0 !important;
+    }
+  }
+
+  @media (max-width: 380px) {
+    .masthead .edition,
+    .masthead .date-stamp { font-size: 9px; letter-spacing: 0.15em; }
+    .tab { font-size: 9px; padding: 14px 4px; }
+    .stat .num { font-size: 24px; }
+  }
+</style>
+</head>
+<body>
+<div class="wrap">
+
+  <header class="masthead">
+    <div class="edition">No. 001 · Vol. I</div>
+    <h1><span class="possessive">Nitin's</span>Inter<span class="amp">stitial</span></h1>
+    <div class="date-stamp" id="todayStamp"></div>
+  </header>
+
+  <div class="tagline-bar">
+    <p class="tagline">notes taken in the spaces between</p>
+    <label class="toggle" id="notifToggle" title="Hourly reminders">
+      <input type="checkbox" id="notifCheck" />
+      <span class="toggle-track"><span class="toggle-thumb"></span></span>
+      <span class="toggle-label" id="notifLabel">Hourly reminders off</span>
+    </label>
+  </div>
+
+  <nav class="tabs">
+    <button class="tab active" data-panel="write">Write</button>
+    <button class="tab" data-panel="search">Search</button>
+    <button class="tab" data-panel="summary">Daily Summary</button>
+  </nav>
+
+  <!-- WRITE -->
+  <section class="panel active" id="panel-write">
+    <div class="compose">
+      <div class="compose-header">
+        <span class="compose-label">New Entry</span>
+        <span class="live-time" id="liveTime"></span>
+      </div>
+      <textarea id="entryInput" placeholder="What are you doing, thinking, or stepping away from?"></textarea>
+      <div class="compose-footer">
+        <span class="hint">Tap when ready</span>
+        <button class="primary" id="saveBtn">Record</button>
+      </div>
+    </div>
+
+    <div class="recent">
+      <h2 class="section-title">Recent</h2>
+      <div class="section-rule">
+        <span class="count" id="recentCount">0 entries</span>
+      </div>
+      <ul class="entries" id="recentList"></ul>
+    </div>
+  </section>
+
+  <!-- SEARCH -->
+  <section class="panel" id="panel-search">
+    <div class="search-box">
+      <span class="search-icon">⌕</span>
+      <input class="search-input" id="searchInput" type="text" placeholder="Search every thought you've recorded..." />
+    </div>
+    <div class="section-rule">
+      <span class="count" id="searchCount">Type to search</span>
+    </div>
+    <ul class="entries" id="searchList"></ul>
+  </section>
+
+  <!-- SUMMARY -->
+  <section class="panel" id="panel-summary">
+    <div class="summary-nav">
+      <button id="prevDay">← Previous</button>
+      <span class="summary-date" id="summaryDate"></span>
+      <button id="nextDay">Next →</button>
+    </div>
+
+    <div class="summary-stats">
+      <div class="stat"><div class="num" id="statEntries">0</div><div class="label">Entries</div></div>
+      <div class="stat"><div class="num" id="statWords">0</div><div class="label">Words</div></div>
+      <div class="stat"><div class="num" id="statSpan">—</div><div class="label">First → Last</div></div>
+    </div>
+
+    <div class="export-bar">
+      <button class="btn-ghost" id="exportDay">Export Day</button>
+      <button class="btn-ghost" id="exportAll" style="margin-left: 8px;">Export All</button>
+    </div>
+
+    <ul class="entries" id="summaryList"></ul>
+  </section>
+
+</div>
+
+<div class="toast" id="toast"></div>
+
+<script>
+  const STORAGE_KEY = 'interstitial_entries_v1';
+
+  // State
+  let entries = loadEntries();
+  let summaryDate = new Date();
+  summaryDate.setHours(0, 0, 0, 0);
+
+  // Storage
+  function loadEntries() {
+    try {
+      const raw = localStorage.getItem(STORAGE_KEY);
+      if (!raw) return [];
+      const list = JSON.parse(raw);
+      // Migrate any old numeric IDs to stable string IDs
+      let migrated = false;
+      list.forEach((e, i) => {
+        if (typeof e.id !== 'string') {
+          e.id = 'e_' + (e.ts || Date.now()).toString(36) + '_' + i.toString(36);
+          migrated = true;
+        }
+      });
+      if (migrated) {
+        try { localStorage.setItem(STORAGE_KEY, JSON.stringify(list)); } catch (_) {}
+      }
+      return list;
+    } catch (e) {
+      return [];
+    }
+  }
+
+  function saveEntries() {
+    try {
+      localStorage.setItem(STORAGE_KEY, JSON.stringify(entries));
+    } catch (e) {
+      toast('Could not save — storage full?');
+    }
+  }
+
+  // Helpers
+  function pad(n) { return String(n).padStart(2, '0'); }
+
+  function formatTime(ts) {
+    const d = new Date(ts);
+    return `${pad(d.getHours())}:${pad(d.getMinutes())}`;
+  }
+
+  function formatDate(ts) {
+    const d = new Date(ts);
+    return d.toLocaleDateString('en-US', { month: 'short', day: 'numeric' }).toUpperCase();
+  }
+
+  function formatFullDate(d) {
+    return d.toLocaleDateString('en-US', { weekday: 'long', month: 'long', day: 'numeric', year: 'numeric' });
+  }
+
+  function sameDay(a, b) {
+    const da = new Date(a), db = new Date(b);
+    return da.getFullYear() === db.getFullYear() && da.getMonth() === db.getMonth() && da.getDate() === db.getDate();
+  }
+
+  function escapeHtml(s) {
+    return s.replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+  }
+
+  function toast(msg) {
+    const t = document.getElementById('toast');
+    t.textContent = msg;
+    t.classList.add('show');
+    setTimeout(() => t.classList.remove('show'), 2200);
+  }
+
+  // Live clock - updates every minute to save battery
+  function updateLiveTime() {
+    const now = new Date();
+    document.getElementById('liveTime').textContent =
+      `${pad(now.getHours())}:${pad(now.getMinutes())}`;
+  }
+  updateLiveTime();
+  // Sync to the next minute boundary, then tick every 60s
+  setTimeout(() => {
+    updateLiveTime();
+    setInterval(updateLiveTime, 60000);
+  }, (60 - new Date().getSeconds()) * 1000);
+
+  // Today stamp
+  function updateTodayStamp() {
+    const d = new Date();
+    document.getElementById('todayStamp').textContent =
+      d.toLocaleDateString('en-US', { weekday: 'short', month: 'short', day: 'numeric' }).toUpperCase();
+  }
+  updateTodayStamp();
+
+  // Tabs
+  document.querySelectorAll('.tab').forEach(btn => {
+    btn.addEventListener('click', () => {
+      document.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
+      document.querySelectorAll('.panel').forEach(p => p.classList.remove('active'));
+      btn.classList.add('active');
+      document.getElementById('panel-' + btn.dataset.panel).classList.add('active');
+      if (btn.dataset.panel === 'summary') renderSummary();
+      if (btn.dataset.panel === 'search') document.getElementById('searchInput').focus();
+      if (btn.dataset.panel === 'write') document.getElementById('entryInput').focus();
+    });
+  });
+
+  // Save entry
+  function saveEntry() {
+    const input = document.getElementById('entryInput');
+    const text = input.value.trim();
+    if (!text) return;
+    const id = 'e_' + Date.now().toString(36) + '_' + Math.random().toString(36).slice(2, 9);
+    entries.unshift({ id, text, ts: Date.now() });
+    saveEntries();
+    input.value = '';
+    input.blur();
+    renderRecent();
+    toast('Entry recorded');
+  }
+
+  document.getElementById('saveBtn').addEventListener('click', saveEntry);
+  document.getElementById('entryInput').addEventListener('keydown', e => {
+    if ((e.metaKey || e.ctrlKey) && e.key === 'Enter') {
+      e.preventDefault();
+      saveEntry();
+    }
+  });
+
+  // Delete entry
+  function deleteEntry(id) {
+    entries = entries.filter(e => String(e.id) !== String(id));
+    saveEntries();
+    renderRecent();
+    renderSearch();
+    renderSummary();
+  }
+
+  // Two-tap delete: first tap arms the button ("Tap again"),
+  // second tap within 3s deletes. This avoids iOS confirm() quirks.
+  let armedDeleteBtn = null;
+  let armedDeleteTimeout = null;
+
+  function disarmDelete() {
+    if (armedDeleteBtn) {
+      armedDeleteBtn.textContent = 'Delete';
+      armedDeleteBtn.classList.remove('armed');
+      armedDeleteBtn = null;
+    }
+    if (armedDeleteTimeout) {
+      clearTimeout(armedDeleteTimeout);
+      armedDeleteTimeout = null;
+    }
+  }
+
+  function handleDeleteTap(btn, evt) {
+    // Prevent the document-level click listener from firing and instantly disarming
+    if (evt) { evt.stopPropagation(); }
+    const id = btn.dataset.id;
+    if (armedDeleteBtn === btn) {
+      // Second tap on same button: confirm delete
+      disarmDelete();
+      deleteEntry(id);
+      toast('Entry deleted');
+    } else {
+      // First tap: arm this button
+      disarmDelete();
+      armedDeleteBtn = btn;
+      btn.textContent = 'Tap again';
+      btn.classList.add('armed');
+      armedDeleteTimeout = setTimeout(disarmDelete, 3000);
+    }
+  }
+
+  // Dismiss armed state if user taps anywhere else
+  document.addEventListener('click', (e) => {
+    if (armedDeleteBtn && !armedDeleteBtn.contains(e.target)) {
+      disarmDelete();
+    }
+  });
+
+  // Render recent (last 10)
+  function renderRecent() {
+    const list = document.getElementById('recentList');
+    const recent = entries.slice(0, 10);
+    document.getElementById('recentCount').textContent =
+      `${entries.length} ${entries.length === 1 ? 'entry' : 'entries'} total`;
+
+    if (!recent.length) {
+      list.innerHTML = `<div class="empty"><div class="ornament">❦</div><p>No entries yet. Start with what's on your mind right now.</p></div>`;
+      return;
+    }
+
+    list.innerHTML = recent.map(e => `
+      <li class="entry">
+        <div class="entry-time">
+          <span class="hhmm">${formatTime(e.ts)}</span>
+          <span class="date">${formatDate(e.ts)}</span>
+        </div>
+        <div class="entry-body">${escapeHtml(e.text)}</div>
+        <button class="delete" data-id="${e.id}">Delete</button>
+      </li>
+    `).join('');
+
+    list.querySelectorAll('.delete').forEach(btn => {
+      btn.addEventListener('click', (ev) => {
+        handleDeleteTap(btn, ev);
+      });
+    });
+  }
+
+  // Search
+  function renderSearch() {
+    const q = document.getElementById('searchInput').value.trim().toLowerCase();
+    const list = document.getElementById('searchList');
+    const count = document.getElementById('searchCount');
+
+    if (!q) {
+      count.textContent = 'Type to search';
+      list.innerHTML = '';
+      return;
+    }
+
+    const matches = entries.filter(e => e.text.toLowerCase().includes(q));
+    count.textContent = `${matches.length} ${matches.length === 1 ? 'match' : 'matches'}`;
+
+    if (!matches.length) {
+      list.innerHTML = `<div class="empty"><div class="ornament">∅</div><p>Nothing found for "${escapeHtml(q)}"</p></div>`;
+      return;
+    }
+
+    const regex = new RegExp('(' + q.replace(/[.*+?^${}()|[\]\\]/g, '\\$&') + ')', 'gi');
+    list.innerHTML = matches.map(e => `
+      <li class="entry">
+        <div class="entry-time">
+          <span class="hhmm">${formatTime(e.ts)}</span>
+          <span class="date">${formatDate(e.ts)}</span>
+        </div>
+        <div class="entry-body">${escapeHtml(e.text).replace(regex, '<mark>$1</mark>')}</div>
+        <button class="delete" data-id="${e.id}">Delete</button>
+      </li>
+    `).join('');
+
+    list.querySelectorAll('.delete').forEach(btn => {
+      btn.addEventListener('click', (ev) => {
+        handleDeleteTap(btn, ev);
+      });
+    });
+  }
+
+  document.getElementById('searchInput').addEventListener('input', renderSearch);
+
+  // Summary
+  document.getElementById('prevDay').addEventListener('click', () => {
+    summaryDate.setDate(summaryDate.getDate() - 1);
+    renderSummary();
+  });
+
+  document.getElementById('nextDay').addEventListener('click', () => {
+    summaryDate.setDate(summaryDate.getDate() + 1);
+    renderSummary();
+  });
+
+  function renderSummary() {
+    document.getElementById('summaryDate').textContent = formatFullDate(summaryDate);
+
+    const today = new Date();
+    today.setHours(0, 0, 0, 0);
+    document.getElementById('nextDay').disabled = summaryDate >= today;
+
+    const dayEntries = entries.filter(e => sameDay(e.ts, summaryDate)).sort((a, b) => a.ts - b.ts);
+
+    document.getElementById('statEntries').textContent = dayEntries.length;
+    const words = dayEntries.reduce((acc, e) => acc + e.text.trim().split(/\s+/).filter(Boolean).length, 0);
+    document.getElementById('statWords').textContent = words;
+
+    if (dayEntries.length >= 2) {
+      document.getElementById('statSpan').textContent =
+        `${formatTime(dayEntries[0].ts)}→${formatTime(dayEntries[dayEntries.length-1].ts)}`;
+    } else if (dayEntries.length === 1) {
+      document.getElementById('statSpan').textContent = formatTime(dayEntries[0].ts);
+    } else {
+      document.getElementById('statSpan').textContent = '—';
+    }
+
+    const list = document.getElementById('summaryList');
+    if (!dayEntries.length) {
+      list.innerHTML = `<div class="empty"><div class="ornament">◦</div><p>No entries this day.</p></div>`;
+      return;
+    }
+
+    list.innerHTML = dayEntries.map(e => `
+      <li class="entry">
+        <div class="entry-time">
+          <span class="hhmm">${formatTime(e.ts)}</span>
+        </div>
+        <div class="entry-body">${escapeHtml(e.text)}</div>
+        <button class="delete" data-id="${e.id}">Delete</button>
+      </li>
+    `).join('');
+
+    list.querySelectorAll('.delete').forEach(btn => {
+      btn.addEventListener('click', (ev) => {
+        handleDeleteTap(btn, ev);
+      });
+    });
+  }
+
+  // Export
+  function downloadText(filename, text) {
+    const blob = new Blob([text], { type: 'text/plain;charset=utf-8' });
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement('a');
+    a.href = url;
+    a.download = filename;
+    a.click();
+    URL.revokeObjectURL(url);
+  }
+
+  function entriesToText(list, title) {
+    const header = `${title}\n${'='.repeat(title.length)}\n\n`;
+    const body = list.map(e => {
+      const d = new Date(e.ts);
+      const stamp = `${d.toLocaleDateString()} ${formatTime(e.ts)}`;
+      return `[${stamp}]\n${e.text}\n`;
+    }).join('\n');
+    return header + body;
+  }
+
+  document.getElementById('exportDay').addEventListener('click', () => {
+    const dayEntries = entries.filter(e => sameDay(e.ts, summaryDate)).sort((a, b) => a.ts - b.ts);
+    if (!dayEntries.length) { toast('Nothing to export'); return; }
+    const iso = summaryDate.toISOString().slice(0, 10);
+    downloadText(`journal-${iso}.txt`, entriesToText(dayEntries, `Journal · ${formatFullDate(summaryDate)}`));
+    toast('Day exported');
+  });
+
+  document.getElementById('exportAll').addEventListener('click', () => {
+    if (!entries.length) { toast('Nothing to export'); return; }
+    const sorted = [...entries].sort((a, b) => a.ts - b.ts);
+    downloadText(`journal-all.txt`, entriesToText(sorted, 'Interstitial · Complete Journal'));
+    toast('All entries exported');
+  });
+
+  // Initial render
+  renderRecent();
+  // Note: we don't auto-focus the textarea on load so the iOS keyboard
+  // doesn't pop up every time the app is opened. User taps to write.
+
+  // ==================================================
+  //  HOURLY REMINDER NOTIFICATIONS
+  // ==================================================
+  // Note: On iOS home-screen web apps, these fire when the app is
+  // open or recently backgrounded. For always-on reminders when
+  // the app is closed, this would need to be wrapped in Capacitor
+  // and use native local notifications.
+  const NOTIF_KEY = 'interstitial_notif_on';
+  const notifCheck = document.getElementById('notifCheck');
+  const notifLabel = document.getElementById('notifLabel');
+  let notifTimer = null;
+
+  const REMINDER_PROMPTS = [
+    "What are you working on right now?",
+    "Step back. What just happened?",
+    "What's on your mind this hour?",
+    "Capture the moment before it slips.",
+    "What were you about to do next?",
+    "One line about where you are.",
+    "Notice anything? Write it down.",
+    "What just shifted?"
+  ];
+
+  function randomPrompt() {
+    return REMINDER_PROMPTS[Math.floor(Math.random() * REMINDER_PROMPTS.length)];
+  }
+
+  function setLabel(on) {
+    notifLabel.textContent = on ? 'Hourly reminders on' : 'Hourly reminders off';
+  }
+
+  function fireNotification() {
+    if (!('Notification' in window) || Notification.permission !== 'granted') return;
+    try {
+      new Notification("Nitin's Interstitial", {
+        body: randomPrompt(),
+        icon: "data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 180 180'%3E%3Crect width='180' height='180' rx='40' fill='%23e4ebd9'/%3E%3Ctext x='90' y='132' text-anchor='middle' font-family='Georgia,serif' font-style='italic' font-size='128' fill='%236b7a4a'%3EI%3C/text%3E%3C/svg%3E",
+        tag: 'hourly-reminder'
+      });
+    } catch (e) {
+      console.warn('Notification failed', e);
+    }
+  }
+
+  function scheduleNextHourly() {
+    clearTimeout(notifTimer);
+    // Fire at the top of each hour: compute ms until next :00
+    const now = new Date();
+    const msUntilNextHour = (60 - now.getMinutes()) * 60 * 1000 - now.getSeconds() * 1000 - now.getMilliseconds();
+    notifTimer = setTimeout(() => {
+      fireNotification();
+      scheduleNextHourly();
+    }, msUntilNextHour);
+  }
+
+  function stopHourly() {
+    clearTimeout(notifTimer);
+    notifTimer = null;
+  }
+
+  async function enableNotifications() {
+    if (!('Notification' in window)) {
+      toast('Notifications not supported here');
+      notifCheck.checked = false;
+      setLabel(false);
+      return false;
+    }
+    let perm = Notification.permission;
+    if (perm === 'default') {
+      perm = await Notification.requestPermission();
+    }
+    if (perm !== 'granted') {
+      toast('Permission denied');
+      notifCheck.checked = false;
+      setLabel(false);
+      return false;
+    }
+    scheduleNextHourly();
+    setLabel(true);
+    toast('Reminders on, every hour');
+    return true;
+  }
+
+  notifCheck.addEventListener('change', async () => {
+    if (notifCheck.checked) {
+      const ok = await enableNotifications();
+      localStorage.setItem(NOTIF_KEY, ok ? '1' : '0');
+    } else {
+      stopHourly();
+      setLabel(false);
+      localStorage.setItem(NOTIF_KEY, '0');
+      toast('Reminders off');
+    }
+  });
+
+  // Restore toggle state on load
+  (function initNotif() {
+    const saved = localStorage.getItem(NOTIF_KEY) === '1';
+    if (saved && 'Notification' in window && Notification.permission === 'granted') {
+      notifCheck.checked = true;
+      setLabel(true);
+      scheduleNextHourly();
+    } else {
+      notifCheck.checked = false;
+      setLabel(false);
+      if (saved) localStorage.setItem(NOTIF_KEY, '0');
+    }
+  })();
+</script>
+</body>
+</html>
